@@ -40,5 +40,5 @@ jobs:
       - name: "Verify the image"
         run: |
           cosign verify --key env://COSIGN_PUBLIC_KEY ghcr.io/passioninfinite/test_node_image
-        with:
+        env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
