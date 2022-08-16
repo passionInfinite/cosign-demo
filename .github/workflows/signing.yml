@@ -12,7 +12,7 @@ on:
 
 env:
   IMAGE_NAME: test_node_image
-  REPOSITORY: ghcr.io
+  REGISTRY: ghcr.io
 
 jobs:
   # This job is to install cosign and verify the installation of it.
@@ -32,7 +32,7 @@ jobs:
       - name: Log into registry
         uses: docker/login-action@v1.12.0
         with:
-          registry: ${{ env.REPOSITORY }}
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
