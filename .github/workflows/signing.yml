@@ -31,8 +31,8 @@ jobs:
           TOKEN: ${{secrets.GITHUB_TOKEN}}
           USERNAME: passioninfinite
 
-      - name: "Build Docker image"
-        run: docker build -t test_node_image .
+      - name: "Build & push Docker image"
+        run: docker build -t test_node_image . && docker push
 
       - name: "Sign image with a key"
         run: |
