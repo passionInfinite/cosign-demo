@@ -10,6 +10,10 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  IMAGE_NAME: test_node_image
+  REPOSITORY: ghcr.io
+
 jobs:
   # This job is to install cosign and verify the installation of it.
   install-cosign:
@@ -25,18 +29,24 @@ jobs:
       - name: "Checkout Github repository"
         uses: actions/checkout@v3
 
-      - name: "Docker login to ghcr"
-        run: echo $TOKEN | docker login ghcr.io -u $USERNAME --password-stdin
-        env:
-          TOKEN: ${{secrets.GITHUB_TOKEN}}
-          USERNAME: passioninfinite
+      - name: Log into registry
+        uses: docker/login-action@v1.12.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Build & push Docker image"
-        run: docker build -t test_node_image . && docker push
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v2.9.0
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}
 
       - name: "Sign image with a key"
         run: |
-          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS} ghcr.io/passioninfinite/test_node_image
+          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS} ${{ env.REGISTRY }}/${{ github.actor }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}
         env:
           TAGS: ${{ steps.docker_meta.outputs.tags }}
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
@@ -44,7 +54,7 @@ jobs:
 
       - name: "Verify the image"
         run: |
-          cosign verify --key env://COSIGN_PUBLIC_KEY ghcr.io/passioninfinite/test_node_image
+          cosign verify --key env://COSIGN_PUBLIC_KEY ${{ env.REGISTRY }}/${{ github.actor }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}
 
       - name: "Docker logout"
         run: docker logout
