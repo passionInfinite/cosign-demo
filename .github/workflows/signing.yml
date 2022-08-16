@@ -25,6 +25,11 @@ jobs:
       - name: "Checkout Github repository"
         uses: actions/checkout@v3
 
+      - name: "Docker login to ghcr"
+        run: echo $TOKEN | docker login ghcr.io -u USERNAME --password-stdin
+        env:
+          TOKEN: ${{secrets.GITHUB_TOKEN}}
+
       - name: "Build Docker image"
         run: docker build -t test_node_image .
 
@@ -35,10 +40,10 @@ jobs:
           TAGS: ${{ steps.docker_meta.outputs.tags }}
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
           COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: "Verify the image"
         run: |
           cosign verify --key env://COSIGN_PUBLIC_KEY ghcr.io/passioninfinite/test_node_image
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: "Docker logout"
+        run: docker logout
