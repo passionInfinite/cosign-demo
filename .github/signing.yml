@@ -1,0 +1,45 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Cosign Image signing
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  # This job is to install cosign and verify the installation of it.
+  install-cosign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Install cosign"
+        uses: sigstore/cosign-installer@main
+        with:
+          cosign-release: "v1.9.0"
+      - name: "Check cosign install version"
+        run: cosign version
+
+  # This job is to build the docker image.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout Github repository"
+        uses: actions/checkout@v3
+
+      - name: "Build Docker image"
+        run: docker build -t test_node_image
+
+      - name: Sign image with a key
+        run: |
+          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS} test_node_image
+        env:
+          TAGS: ${{ steps.docker_meta.outputs.tags }}
+          COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
+          COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
+
+      - name: Verify the image
+        run: |
+          cosign verify --key env://COSIGN_PUBLIC_KEY ghcr.io/passioninfinite/test_node_image
