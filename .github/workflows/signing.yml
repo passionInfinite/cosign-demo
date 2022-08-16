@@ -35,7 +35,10 @@ jobs:
           TAGS: ${{ steps.docker_meta.outputs.tags }}
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
           COSIGN_PASSWORD: ${{secrets.COSIGN_PASSWORD}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: "Verify the image"
         run: |
           cosign verify --key env://COSIGN_PUBLIC_KEY ghcr.io/passioninfinite/test_node_image
+        with:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
