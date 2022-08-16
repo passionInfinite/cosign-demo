@@ -60,6 +60,7 @@ jobs:
       - name: "Verify the image"
         run: |
           cosign verify --key env://COSIGN_PUBLIC_KEY ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:${{ github.run_id }}
-
+        env:
+          COSIGN_PUBLIC_KEY: ${{secrets.COSIGN_PUBLIC_KEY}}
       - name: "Docker logout"
         run: docker logout
