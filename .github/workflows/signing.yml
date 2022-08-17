@@ -51,8 +51,7 @@ jobs:
 
       - name: "Sign image with a key"
         run: |
-          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ 
-env.IMAGE_NAME }}:v1.0
+          cosign sign --key env://COSIGN_PRIVATE_KEY ${TAGS} ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{env.IMAGE_NAME }}:v1.0
         env:
           TAGS: ${{ steps.docker_meta.outputs.tags }}
           COSIGN_PRIVATE_KEY: ${{secrets.COSIGN_PRIVATE_KEY}}
@@ -60,8 +59,7 @@ env.IMAGE_NAME }}:v1.0
 
       - name: "Verify the image"
         run: |
-          cosign verify --key env://COSIGN_PUBLIC_KEY ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME 
-}}:v1.0
+          cosign verify --key env://COSIGN_PUBLIC_KEY ${{ env.REGISTRY }}/${{ env.OWNER_LC }}/${{ env.IMAGE_NAME }}:v1.0
         env:
           COSIGN_PUBLIC_KEY: ${{secrets.COSIGN_PUBLIC_KEY}}
       - name: "Docker logout"
